@@ -1,0 +1,75 @@
+{% extends 'base.html' %} {% block content %}
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-8 card mb-4  mt-3 left  top">
+      <div class="card-body">
+        <h1>{% block title %} {{ object.title }} {% endblock title %}</h1>
+        <p class=" text-muted">{{ post.author }} | {{ post.created_on }}</p>
+        <p class="card-text ">{{ object.content | safe }}</p>
+        {% if post.author == user %}
+        <div>
+          <a class="btn btn-info btn-lg" style="margin-top: 30px" href="{% url "blog-update" post.slug %}">UPDATE</a>
+          <a class="btn btn-info btn-lg" style="margin-top: 30px" href="{% url "blog-delete" post.slug %}">Delete</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% block sidebar %} {% include 'sidebar.html' %} {% endblock sidebar %}
+  </div>
+</div>
+<div>
+{% if user.is_authenticated %}
+  <form action="{% url 'blogpost_like' object.id %}" method="POST">
+    {% csrf_token %}
+
+    {% if post_is_liked %}
+    <button type="submit" name="blogpost_id" value="{{object.id}}" class="btn btn-info">Unlike</button>
+    {% else %}
+    <button type="submit" name="blogpost_id" value="{{object.id}}" class="btn btn-info">Like</button>
+    {% endif %}
+  </form>
+{% else %}
+  <a class="btn btn-outline-info" href="{% url 'login' %}?next={{request.path}}">Log in to like this article!</a><br>
+{% endif %}
+<strong class="text-secondary">{{ number_of_likes }} Like{{ number_of_likes|pluralize }}</strong>
+</div>
+<h2>Leave your comment!</h2>
+<div id="comments_section">
+
+  {% if user.is_authenticated %}
+  <form method="POST">
+    {% csrf_token %}
+    <div class="form-group">
+      {{ comment_form }}
+      <button class="btn btn-info" type="submit">Add comment <i class="fas fa-comments"></i></button>
+    </div>
+  </form>
+  {% else %}
+  <a class="btn btn-outline-info" href="{% url 'login' %}?next={{request.path}}">Log in to add a comment!</a><br>
+  {% endif %}
+
+  {% if comments %}
+  <strong class="text-secondary">{{ object.number_of_comments }} Comment{{ object.number_of_comments|pluralize }}</strong>
+  <hr>
+  <ul>
+    {% for comment in comments %}
+    <li>           
+     <div>
+        <span>
+          <strong class="text-info">{{ comment.author }} </strong>
+          <small class="text-muted">{{ comment.date_posted }}</small>
+        </span>
+        <p>
+          {{ comment.content|safe }}
+        </p>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <strong class="text-secondary">No comments yet...</strong>
+  {% endif %}
+
+</div>
+{% endblock content %}

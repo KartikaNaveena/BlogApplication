@@ -1,0 +1,18 @@
+<div class="container mt-5 mb-3">
+ 
+    <div class="row">
+        {% for post in posts %}
+        <div class="col-lg-4 my-4">
+            <div class="card shadow" style="width: 20rem; height: 33rem;">
+                <img src="/media/{{post.image}}" class="card-img-top" alt="..." height="250px">
+                <div class="card-body">
+                  <h5 class="card-title">{{post.title}} <br><small>by {{post.author}}</small></h5>
+                  <p class="card-text">{{post.content | safe }}</p>
+                  
+                  <a href="blog/{{post.slug}}" class="btn btn-primary">Read More {% if user.is_superuser %}<a href="delete_blog_post/{{post.slug}}/" class="btn btn-danger mx-4">Delete Blog</a>{% endif %}</a>
+                </div>
+              </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
