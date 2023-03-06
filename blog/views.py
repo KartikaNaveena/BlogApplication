@@ -11,7 +11,9 @@ from . import models
 from .forms import UpdateUserForm, UpdateProfileForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import  reverse_lazy
-# Create your views here.
+from .forms import ProfileForm, form_validation_error
+from django.views import View
+from .models import Profile
 from django.views import generic
 from .models import Post,BlogComment
 from django.shortcuts import get_object_or_404
@@ -35,10 +37,22 @@ def BlogPostLike(request, pk):
     else:
         post.likes.add(request.user)
 
-    return HttpResponseRedirect(reverse('blogpost-detail', args=[str(pk)]))
+    return HttpResponseRedirect(reverse('post_detail', args=[str(pk)]))
+
+   
 class PostDetail(generic.DetailView):
     model = Post
     template_name = 'post_detail.html'
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+
+        likes_connected = get_object_or_404(Post, id=self.kwargs['pk'])
+        liked = False
+        if likes_connected.likes.filter(id=self.request.user.id).exists():
+            liked = True
+        data['number_of_likes'] = likes_connected.number_of_likes()
+        data['post_is_liked'] = liked
+        return data
     def get_context_data(self, **kwargs):
         
         data = super().get_context_data(**kwargs)
@@ -56,27 +70,13 @@ class PostDetail(generic.DetailView):
                                   blogpost_connected=self.get_object())
         new_comment.save()
         return self.get(self, request, *args, **kwargs)
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        pk = Post.pk
-        likes_connected = get_object_or_404(Post, id=self.kwargs[ 'pk'])
-        liked = False
-        if likes_connected.likes.filter(id=self.request.user.id).exists():
-            liked = True
-        data['number_of_likes'] = likes_connected.number_of_likes()
-        data['post_is_liked'] = liked
-        return data
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
+    
+    
 
-        likes_connected = get_object_or_404(Post, id=self.kwargs['pk'])
-        liked = False
-        if likes_connected.likes.filter(id=self.request.user.id).exists():
-            liked = True
-        data['number_of_likes'] = likes_connected.number_of_likes()
-        data['post_is_liked'] = liked
-        return data
 
+          
+
+    
         
 def Register(request):
     if request.method=="POST":   
@@ -97,7 +97,22 @@ def Register(request):
         user.save()
         return render(request, 'login.html')  
     return render(request, "register.html")
+@login_required
+def profile(request):
+    if request.method == 'POST':
+        user_form = UpdateUserForm(request.POST, instance=request.user)
+        profile_form = UpdateProfileForm(request.POST, request.FILES, instance=request.user.profile)
 
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Your profile is updated successfully')
+            return redirect(to='users-profile')
+    else:
+        user_form = UpdateUserForm(instance=request.user)
+        profile_form = UpdateProfileForm(instance=request.user.profile)
+
+    return render(request, 'users/profile.html', {'user_form': user_form, 'profile_form': profile_form})
 
 
 def login_request(request):
@@ -119,6 +134,44 @@ def login_request(request):
 			messages.error(request,"Invalid username or password.")
 	form = AuthenticationForm()
 	return render(request=request, template_name="login.html", context={"login_form":form})
+class MyProfile(LoginRequiredMixin, View):
+    def get(self, request):
+        user_form = UpdateUserForm(instance=request.user)
+        profile_form = UpdateProfileForm(instance=request.user.profile)
+        
+        context = {
+            'user_form': user_form,
+            'profile_form': profile_form
+        }
+        
+        return render(request, 'profile.html', context)
+    
+    def post(self,request):
+        user_form = UpdateUserForm(
+            request.POST, 
+            instance=request.user
+        )
+        profile_form = UpdateProfileForm(
+            request.POST,
+            request.FILES,
+            instance=request.user.profile
+        )
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            
+            messages.success(request,'Your profile has been updated successfully')
+            
+            return redirect('profile')
+        else:
+            context = {
+                'user_form': user_form,
+                'profile_form': profile_form
+            }
+            messages.error(request,'Error updating you profile')
+            
+            return render(request, 'profile.html', context)
 @login_required
 def profile(request):
     if request.method == 'POST':
@@ -134,11 +187,7 @@ def profile(request):
         user_form = UpdateUserForm(instance=request.user)
         profile_form = UpdateProfileForm(instance=request.user.profile)
 
-    return render(request, 'profile.html', {'user_form': user_form, 'profile_form': profile_form})
-def About(request):
-    return render(request, "about.html")
-
-  
+    return render(request, 'profile.html', {'user_form': user_form, 'profile_form': profile_form}) 
 
 
 def blogs(request):

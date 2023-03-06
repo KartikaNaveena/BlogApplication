@@ -20,7 +20,7 @@
 </div>
 <div>
 {% if user.is_authenticated %}
-  <form action="{% url 'blogpost_like' object.id %}" method="POST">
+  <form action="{% url 'blogpost-like' object.id %}" method="POST">
     {% csrf_token %}
 
     {% if post_is_liked %}
