@@ -11,18 +11,7 @@ from ckeditor.fields import RichTextField
 from django.utils import timezone
 
 
-from PIL import Image
 
-# resizing images
-def save(self, *args, **kwargs):
-    super().save()
-
-    img = Image.open(self.avatar.path)
-
-    if img.height > 100 or img.width > 100:
-        new_img = (100, 100)
-        img.thumbnail(new_img)
-        img.save(self.avatar.path)
 STATUS = (
     (0,"Draft"),
     (1,"Publish")
