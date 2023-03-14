@@ -1,4 +1,4 @@
-from .models import Profile,Post,BlogComment
+from .models import Profile,Post,BlogComment,Profile
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
@@ -21,10 +21,8 @@ class NewCommentForm(forms.ModelForm):
     class Meta:
         model = BlogComment
         fields = ['content']
-from django import forms
 
-from django.contrib.auth.models import User
-from .models import Profile
+
 
 
 class UpdateUserForm(forms.ModelForm):
@@ -44,20 +42,5 @@ class UpdateProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['avatar', 'bio']
-class ProfileForm(forms.ModelForm):
-    first_name = forms.CharField(max_length=255)
-    last_name = forms.CharField(max_length=255)
-    email = forms.EmailField()
 
-    class Meta:
-        model = Profile
-        fields = '__all__'
-        exclude = ['user']
-
-def form_validation_error(form):
-    msg = ""
-    for field in form:
-        for error in field.errors:
-            msg += "%s: %s \\n" % (field.label if hasattr(field, 'label') else 'Error', error)
-    return msg
 

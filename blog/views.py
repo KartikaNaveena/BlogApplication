@@ -5,17 +5,12 @@ from django.contrib.auth import login,authenticate,logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.template.defaultfilters import slugify
-from django.views.generic.edit import  DeleteView, UpdateView   
 from django.shortcuts import render,redirect,get_object_or_404
-from . import models
 from .forms import UpdateUserForm, UpdateProfileForm
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import  reverse_lazy
-from .forms import ProfileForm, form_validation_error
+from .models import Post,BlogComment,Profile
 from django.views import View
-from .models import Profile
 from django.views import generic
-from .models import Post,BlogComment
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -23,13 +18,24 @@ from blog.forms import BlogPostForm,SignUpForm,NewCommentForm
 from django.contrib.auth.forms import AuthenticationForm 
 from django.contrib.auth.views import PasswordChangeView
 from django.contrib.messages.views import SuccessMessageMixin
+
+
+
+
+
 class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
     template_name = 'change_password.html'
     success_message = "Successfully Changed Your Password"
     success_url = reverse_lazy('home')
+
+
+
 class PostList(generic.ListView):
     queryset = Post.objects.filter(status=1).order_by('-created_on')
     template_name = 'index.html'
+
+
+
 def BlogPostLike(request,pk):
     post = get_object_or_404(Post, id=request.POST.get('blogpost_id'))
     if post.likes.filter(id=request.user.id).exists():
@@ -99,6 +105,9 @@ def Register(request):
         user.save()
         return render(request, 'login.html')  
     return render(request, "register.html")
+
+
+
 @login_required
 def profile(request):
     if request.method == 'POST':
@@ -114,7 +123,7 @@ def profile(request):
         user_form = UpdateUserForm(instance=request.user)
         profile_form = UpdateProfileForm(instance=request.user.profile)
 
-    return render(request, 'users/profile.html', {'user_form': user_form, 'profile_form': profile_form})
+    return render(request, 'profile.html', {'user_form': user_form, 'profile_form': profile_form})
 
 
 def login_request(request):
@@ -136,60 +145,10 @@ def login_request(request):
 			messages.error(request,"Invalid username or password.")
 	form = AuthenticationForm()
 	return render(request=request, template_name="login.html", context={"login_form":form})
-class MyProfile(LoginRequiredMixin, View):
-    def get(self, request):
-        user_form = UpdateUserForm(instance=request.user)
-        profile_form = UpdateProfileForm(instance=request.user.profile)
-        
-        context = {
-            'user_form': user_form,
-            'profile_form': profile_form
-        }
-        
-        return render(request, 'profile.html', context)
-    
-    def post(self,request):
-        user_form = UpdateUserForm(
-            request.POST, 
-            instance=request.user
-        )
-        profile_form = UpdateProfileForm(
-            request.POST,
-            request.FILES,
-            instance=request.user.profile
-        )
 
-        if user_form.is_valid() and profile_form.is_valid():
-            user_form.save()
-            profile_form.save()
-            
-            messages.success(request,'Your profile has been updated successfully')
-            
-            return redirect('profile')
-        else:
-            context = {
-                'user_form': user_form,
-                'profile_form': profile_form
-            }
-            messages.error(request,'Error updating you profile')
-            
-            return render(request, 'profile.html', context)
-@login_required
-def profile(request):
-    if request.method == 'POST':
-        user_form = UpdateUserForm(request.POST, instance=request.user)
-        profile_form = UpdateProfileForm(request.POST, request.FILES, instance=request.user.profile)
 
-        if user_form.is_valid() and profile_form.is_valid():
-            user_form.save()
-            profile_form.save()
-            messages.success(request, 'Your profile is updated successfully')
-            return redirect(to='users-profile')
-    else:
-        user_form = UpdateUserForm(instance=request.user)
-        profile_form = UpdateProfileForm(instance=request.user.profile)
 
-    return render(request, 'profile.html', {'user_form': user_form, 'profile_form': profile_form}) 
+
 
 
 def blogs(request):
@@ -215,18 +174,7 @@ def logout_request(request):
 	logout(request)
 	messages.info(request, "You have successfully logged out.") 
 	return redirect("home")
-def search(request):
-    results = []
 
-    if request.method == "GET":
-        query = request.GET.get('search')
-
-        if query == '':
-            query = 'None'
-
-        results = Post.objects.filter(Q(title=query) | Q(author=query) | Q(slug=query) )
-
-    return render(request, 'search.html', {'query': query, 'results': results})
 
 def deletePost(request,slug):
     post = get_object_or_404(Post,slug=slug)
