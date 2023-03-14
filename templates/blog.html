@@ -7,7 +7,7 @@
                 <img src="/media/{{post.image}}" class="card-img-top" alt="..." height="250px">
                 <div class="card-body">
                   <h5 class="card-title">{{post.title}} <br><small>by {{post.author}}</small></h5>
-                  <p class="card-text">{{post.content | safe }}</p>
+                  <p class="card-text">{{post.content | safe |truncatewords:400}}</p>
                   
                   <a href="blog/{{post.slug}}" class="btn btn-primary">Read More {% if user.is_superuser %}<a href="delete_blog_post/{{post.slug}}/" class="btn btn-danger mx-4">Delete Blog</a>{% endif %}</a>
                 </div>

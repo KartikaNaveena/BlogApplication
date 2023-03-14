@@ -20,7 +20,7 @@
 </div>
 <div>
 {% if user.is_authenticated %}
-  <form action="{% url 'blogpost-like' object.id %}" method="POST">
+  <form action="{% url 'blogpost_like' object.id %}" method="POST">
     {% csrf_token %}
 
     {% if post_is_liked %}
@@ -31,8 +31,9 @@
   </form>
 {% else %}
   <a class="btn btn-outline-info" href="{% url 'login' %}?next={{request.path}}">Log in to like this article!</a><br>
-{% endif %}
-<strong class="text-secondary">{{ number_of_likes }} Like{{ number_of_likes|pluralize }}</strong>
+  {% endif %}
+
+<strong class="text-secondary">{{ object.number_of_likes }} Like{{object.number_of_likes|pluralize }}</strong>
 </div>
 <h2>Leave your comment!</h2>
 <div id="comments_section">

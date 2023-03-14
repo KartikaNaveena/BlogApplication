@@ -30,14 +30,15 @@ class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
 class PostList(generic.ListView):
     queryset = Post.objects.filter(status=1).order_by('-created_on')
     template_name = 'index.html'
-def BlogPostLike(request, pk):
+def BlogPostLike(request,pk):
     post = get_object_or_404(Post, id=request.POST.get('blogpost_id'))
     if post.likes.filter(id=request.user.id).exists():
         post.likes.remove(request.user)
     else:
         post.likes.add(request.user)
 
-    return HttpResponseRedirect(reverse('post_detail', args=[str(pk)]))
+    return HttpResponseRedirect(reverse("home"))
+   
 
    
 class PostDetail(generic.DetailView):
@@ -53,6 +54,7 @@ class PostDetail(generic.DetailView):
         data['number_of_likes'] = likes_connected.number_of_likes()
         data['post_is_liked'] = liked
         return data
+
     def get_context_data(self, **kwargs):
         
         data = super().get_context_data(**kwargs)
