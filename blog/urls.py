@@ -9,7 +9,7 @@ urlpatterns = [
  path("login/", views.login_request, name="login"),
 path('password-change/', views.ChangePasswordView.as_view(), name='password_change'),
   path('profile/', views.profile, name='users-profile'),
-path('blogs/',views.blogs,name='Blogs'),
+
 path('add_blogs/',views.add_blogs,name='Add_Blogs'),
  path('blogpost-like/<int:pk>', views.BlogPostLike, name="blogpost_like"),
 path("logout/", views.logout_request, name= "logout"),

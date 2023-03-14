@@ -30,36 +30,17 @@ class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
 
 
 
+
 class PostList(generic.ListView):
     queryset = Post.objects.filter(status=1).order_by('-created_on')
     template_name = 'index.html'
 
 
-
-def BlogPostLike(request,pk):
-    post = get_object_or_404(Post, id=request.POST.get('blogpost_id'))
-    if post.likes.filter(id=request.user.id).exists():
-        post.likes.remove(request.user)
-    else:
-        post.likes.add(request.user)
-
-    return HttpResponseRedirect(reverse("home"))
-   
-
    
 class PostDetail(generic.DetailView):
     model = Post
     template_name = 'post_detail.html'
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-
-        likes_connected = get_object_or_404(Post, id=self.kwargs['pk'])
-        liked = False
-        if likes_connected.likes.filter(id=self.request.user.id).exists():
-            liked = True
-        data['number_of_likes'] = likes_connected.number_of_likes()
-        data['post_is_liked'] = liked
-        return data
+    
 
     def get_context_data(self, **kwargs):
         
@@ -78,35 +59,6 @@ class PostDetail(generic.DetailView):
                                   blogpost_connected=self.get_object())
         new_comment.save()
         return self.get(self, request, *args, **kwargs)
-    
-    
-
-
-          
-
-    
-        
-def Register(request):
-    if request.method=="POST":   
-        username = request.POST['username']
-        email = request.POST['email']
-        first_name=request.POST['first_name']
-        last_name=request.POST['last_name']
-        password1 = request.POST['password1']
-        password2 = request.POST['password2']
-        
-        if password1 != password2:
-            messages.error(request, "Passwords do not match.")
-            return redirect('/register')
- 
-        user = User.objects.create_user(username, email, password1)
-        user.first_name = first_name
-        user.last_name = last_name
-        user.save()
-        return render(request, 'login.html')  
-    return render(request, "register.html")
-
-
 
 @login_required
 def profile(request):
@@ -147,14 +99,19 @@ def login_request(request):
 	return render(request=request, template_name="login.html", context={"login_form":form})
 
 
+def BlogPostLike(request,pk):
+    post = get_object_or_404(Post, id=request.POST.get('blogpost_id'))
+    if post.likes.filter(id=request.user.id).exists():
+        post.likes.remove(request.user)
+    else:
+        post.likes.add(request.user)
+
+    return HttpResponseRedirect(reverse("home"))
+   
 
 
 
 
-def blogs(request):
-    posts = Post.objects.all()
-    posts = Post.objects.filter().order_by('-dateTime')
-    return render(request, "blog.html", {'posts':posts})
 
 def add_blogs(request):
     form = BlogPostForm(request.POST or None,request.FILES or None)
