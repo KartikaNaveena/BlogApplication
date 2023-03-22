@@ -1,3 +1,5 @@
+ Django-Blogging-App
+A kind of basic Blogging App based on Django Framework
 
 ER Diagram of BlogApplication
 
