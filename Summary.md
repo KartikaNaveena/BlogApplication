@@ -1,6 +1,6 @@
 <h1>Django-BlogApplication</h1>
 The BlogApplication project is simple and well featured website which  allows users to post their thoughts and knowledge with others.
-The project is powered by Django Framework.It uses HTML and CSS for user interface.  
+The project is powered by Django Framework. It uses HTML and CSS for user interface.  
 Django is an open-source web framework, written in Python, that follows the model-view-template architectural pattern.
 A blogging application is where users can publish their blogs and watch others blogs.<br><br>
 This website contains  login and registration page  to access service’s customization, users should have personal accounts so that they can perform actions related only to them.
